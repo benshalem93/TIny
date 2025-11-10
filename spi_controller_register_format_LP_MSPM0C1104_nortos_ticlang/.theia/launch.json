@@ -1,0 +1,16 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang",
+      "type": "ccs-debug",
+      "request": "launch",
+      "projectInfo": {
+        "name": "spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang",
+        "resourceId": "/spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang"
+      }
+    }
+  ]
+}

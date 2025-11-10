@@ -31,6 +31,7 @@
  */
 
 #include "ti_msp_dl_config.h"
+#include "bma530.h"
 
 /*
  * CMD_WRITE_TYPE_X are example write commands/register addresses the
@@ -114,67 +115,121 @@ static void CopyArray(uint8_t *source, uint8_t *dest, uint8_t count);
 static void SPI_Controller_writeReg(
     uint8_t writeCmd, uint8_t *data, uint8_t count);
 static void SPI_Controller_readReg(uint8_t readCmd, uint8_t count);
+static void gotHere();
 
+/* BMA530 Example Main Function */
 int main(void)
+{
+   SYSCFG_DL_init();
 
-DL_UART_setRTSOutput(UART_Regs *uart, DL_UART_RTS val){
-    SYSCFG_DL_init();
+    DL_SYSCTL_disableSleepOnExit();
+    NVIC_EnableIRQ(SPI_0_INST_INT_IRQN);
+    
+    uint8_t data = BMA530_CMD_SOFT_RESET;
+    // uint8_t chipId = 0;
+    SPI_Controller_writeReg(
+        BMA530_REG_CMD, &data, TYPE_1_LENGTH); // soft reset
+    delay_cycles(10000);
+    
+    SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_1_LENGTH);
+    CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
+    gotHere();
+    if(gCmdReadType1Buffer[1] == 0xC2 || gCmdReadType1Buffer[1] == 0x43)
+    {
+        // gotHere();
+    }
+    // SPI_Controller_readReg(CMD_READ_TYPE_2, TYPE_2_LENGTH);
+    
+
+
 
     /* Enable interrupts */
+    // DL_SYSCTL_disableSleepOnExit();
+    // NVIC_EnableIRQ(SPI_0_INST_INT_IRQN);
+
+    // /* Set LED to indicate start */
+    // DL_GPIO_clearPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+
+    // /* Initialize BMA530 sensor */
+
+    // if (BMA530_Init()) {
+    //     /* LED ON indicates successful initialization */
+    //     DL_GPIO_setPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+    // } else {
+    //     /* Fast blink indicates initialization failure */
+    //     while (1) {
+    //         DL_GPIO_togglePins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+    //         delay_cycles(1000000);
+    //     }
+    // }
+
+    // /* Main loop - continuously read accelerometer data */
+    // BMA530_AccelData accelData;
+
+    // while (1) {
+    //     /* Read accelerometer data */
+    //     if (BMA530_ReadAccelData(&accelData)) {
+    //         /* Toggle LED to indicate successful read */
+    //         DL_GPIO_togglePins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+
+    //         /* Add your processing code here */
+    //         /* accelData.x, accelData.y, accelData.z contain raw acceleration values */
+    //     }
+
+    //     /* Delay between reads (approximately 100ms for 10Hz reading rate) */
+    //     delay_cycles(2400000);
+    // }
+}
+
+static void gotHere()
+{
+    while (1) {
+            DL_GPIO_togglePins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+            delay_cycles(1000000);
+        }
+}
+/* Original example main function - kept for reference
+int main_original(void)
+{
+    SYSCFG_DL_init();
+
     DL_SYSCTL_disableSleepOnExit();
     NVIC_EnableIRQ(SPI_0_INST_INT_IRQN);
 
-    /* Set LED to indicate start of transfer */
     DL_GPIO_clearPins(
         GPIO_LEDS_PORT, (GPIO_LEDS_USER_LED_1_PIN | GPIO_LEDS_USER_TEST_PIN));
 
-
-    /*
-     * Send Read Type 2 Command to Peripheral device.
-     * Copy received data to gCmdReadType2Buffer.
-     */
     SPI_Controller_readReg(CMD_READ_TYPE_2, TYPE_2_LENGTH);
     CopyArray(gRxBuffer, gCmdReadType2Buffer, TYPE_2_LENGTH);
 
-
-    /*
-     * Send Read Type 1 Command to Peripheral device.
-     * Copy received data to gCmdReadType1Buffer.
-     */
     SPI_Controller_readReg(CMD_READ_TYPE_1, TYPE_1_LENGTH);
     CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
 
-
-    /*
-     * Send Read Type 0 Command to Peripheral device.
-     * Copy received data to gCmdReadType0Buffer.
-     */
     SPI_Controller_readReg(CMD_READ_TYPE_0, TYPE_0_LENGTH);
     CopyArray(gRxBuffer, gCmdReadType0Buffer, TYPE_0_LENGTH);
 
-
-    /* Send Write Type 2 Command to Peripheral device */
     SPI_Controller_writeReg(
         CMD_WRITE_TYPE_2, gCmdWriteType2Buffer, TYPE_2_LENGTH);
 
-
-    /* Send Write Type 1 Command to Peripheral device */
     SPI_Controller_writeReg(
         CMD_WRITE_TYPE_1, gCmdWriteType1Buffer, TYPE_1_LENGTH);
 
-
-    /* Send Write Type 0 Command to Peripheral device */
     SPI_Controller_writeReg(
         CMD_WRITE_TYPE_0, gCmdWriteType0Buffer, TYPE_0_LENGTH);
 
-
-    /* If write and read were successful, toggle LED */
     while (1) {
         DL_GPIO_togglePins(GPIO_LEDS_PORT,
             (GPIO_LEDS_USER_LED_1_PIN | GPIO_LEDS_USER_TEST_PIN));
         delay_cycles(12000000);
     }
 }
+*/
+
+// void SPI_0_INST_IRQHandler(void)
+// {
+//     /* Route to BMA530 driver interrupt handler */
+//     BMA530_SPI_IRQHandler();
+// }
 
 void SPI_0_INST_IRQHandler(void)
 {
@@ -187,7 +242,6 @@ void SPI_0_INST_IRQHandler(void)
                 case TX_REG_ADDRESS_READ_MODE:
                 case READ_DATA_MODE:
                     if (gTxByteCount) {
-                        /*  Send dummy data to get read more bytes */
                         DL_SPI_transmitData8(SPI_0_INST, DUMMY_DATA);
                         gTxByteCount--;
                     }
@@ -196,12 +250,10 @@ void SPI_0_INST_IRQHandler(void)
                     gControllerMode = WRITE_DATA_MODE;
                 case WRITE_DATA_MODE:
                     if (gTxByteCount) {
-                        /* Transmit data until all expected data is sent */
                         DL_SPI_transmitData8(
                             SPI_0_INST, gTxBuffer[gTxIndex++]);
                         gTxByteCount--;
                     } else {
-                        /* Transmission is done, reset state machine */
                         gControllerMode = IDLE_MODE;
                     }
                     break;
@@ -213,25 +265,21 @@ void SPI_0_INST_IRQHandler(void)
                 case TIMEOUT_MODE:
                     break;
                 case TX_REG_ADDRESS_READ_MODE:
-                    /* Ignore data and change state machine to read data */
                     DL_SPI_receiveData8(SPI_0_INST);
                     gControllerMode = READ_DATA_MODE;
                     break;
                 case READ_DATA_MODE:
                     if (gRxByteCount) {
-                        /* Receive data until all expected data is read */
                         gRxBuffer[gRxIndex++] =
                             DL_SPI_receiveData8(SPI_0_INST);
                         gRxByteCount--;
                     }
                     if (gRxByteCount == 0) {
-                        /* All data is received, reset state machine */
                         gControllerMode = IDLE_MODE;
                     }
                     break;
                 case TX_REG_ADDRESS_WRITE_MODE:
                 case WRITE_DATA_MODE:
-                    /* Ignore the data while transmitting */
                     DL_SPI_receiveData8(SPI_0_INST);
                     break;
             }
@@ -240,6 +288,7 @@ void SPI_0_INST_IRQHandler(void)
             break;
     }
 }
+
 
 /*
  *  Controller sends a command to the Peripheral device to write data sent

@@ -87,18 +87,18 @@ extern "C" {
 #define GPIO_SPI_0_IOMUX_PICO                                   (IOMUX_PINCM19)
 #define GPIO_SPI_0_IOMUX_PICO_FUNC                   IOMUX_PINCM19_PF_SPI0_PICO
 #define GPIO_SPI_0_POCI_PORT                                              GPIOA
-#define GPIO_SPI_0_POCI_PIN                                      DL_GPIO_PIN_16
-#define GPIO_SPI_0_IOMUX_POCI                                   (IOMUX_PINCM17)
-#define GPIO_SPI_0_IOMUX_POCI_FUNC                   IOMUX_PINCM17_PF_SPI0_POCI
+#define GPIO_SPI_0_POCI_PIN                                       DL_GPIO_PIN_4
+#define GPIO_SPI_0_IOMUX_POCI                                    (IOMUX_PINCM5)
+#define GPIO_SPI_0_IOMUX_POCI_FUNC                    IOMUX_PINCM5_PF_SPI0_POCI
 /* GPIO configuration for SPI_0 */
 #define GPIO_SPI_0_SCLK_PORT                                              GPIOA
-#define GPIO_SPI_0_SCLK_PIN                                      DL_GPIO_PIN_11
-#define GPIO_SPI_0_IOMUX_SCLK                                   (IOMUX_PINCM12)
-#define GPIO_SPI_0_IOMUX_SCLK_FUNC                   IOMUX_PINCM12_PF_SPI0_SCLK
+#define GPIO_SPI_0_SCLK_PIN                                       DL_GPIO_PIN_6
+#define GPIO_SPI_0_IOMUX_SCLK                                    (IOMUX_PINCM7)
+#define GPIO_SPI_0_IOMUX_SCLK_FUNC                    IOMUX_PINCM7_PF_SPI0_SCLK
 #define GPIO_SPI_0_CS0_PORT                                               GPIOA
-#define GPIO_SPI_0_CS0_PIN                                        DL_GPIO_PIN_6
-#define GPIO_SPI_0_IOMUX_CS0                                     (IOMUX_PINCM7)
-#define GPIO_SPI_0_IOMUX_CS0_FUNC                      IOMUX_PINCM7_PF_SPI0_CS0
+#define GPIO_SPI_0_CS0_PIN                                        DL_GPIO_PIN_2
+#define GPIO_SPI_0_IOMUX_CS0                                     (IOMUX_PINCM3)
+#define GPIO_SPI_0_IOMUX_CS0_FUNC                      IOMUX_PINCM3_PF_SPI0_CS0
 
 
 
@@ -108,9 +108,6 @@ extern "C" {
 /* Defines for USER_LED_1: GPIOA.22 with pinCMx 23 on package pin 17 */
 #define GPIO_LEDS_USER_LED_1_PIN                                (DL_GPIO_PIN_22)
 #define GPIO_LEDS_USER_LED_1_IOMUX                               (IOMUX_PINCM23)
-/* Defines for USER_TEST: GPIOA.2 with pinCMx 3 on package pin 8 */
-#define GPIO_LEDS_USER_TEST_PIN                                  (DL_GPIO_PIN_2)
-#define GPIO_LEDS_USER_TEST_IOMUX                                 (IOMUX_PINCM3)
 
 
 /* clang-format on */
