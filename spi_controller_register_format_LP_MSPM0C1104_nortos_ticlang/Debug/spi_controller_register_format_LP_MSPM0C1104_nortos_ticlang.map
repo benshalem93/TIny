@@ -1,7 +1,7 @@
 ******************************************************************************
             TI ARM Clang Linker PC v4.0.4                      
 ******************************************************************************
->> Linked Tue Nov 11 18:49:18 2025
+>> Linked Tue Nov 11 18:57:43 2025
 
 OUTPUT FILE NAME:   <spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang.out>
 ENTRY POINT SYMBOL: "_c_int00_noargs"  address: 00000959

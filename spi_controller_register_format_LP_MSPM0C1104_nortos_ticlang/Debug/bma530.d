@@ -1,6 +1,6 @@
 # FIXED
 
-spi_controller_register_format.o: ../spi_controller_register_format.c \
+bma530.o: ../bma530.c ../bma530.h \
  ti_msp_dl_config.h \
  C:/ti/mspm0_sdk_2_07_00_05/source/ti/devices/msp/msp.h \
  C:/ti/mspm0_sdk_2_07_00_05/source/ti/devices/DeviceFamily.h \
@@ -75,12 +75,8 @@ spi_controller_register_format.o: ../spi_controller_register_format.c \
  C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/dl_vref.h \
  C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/dl_wwdt.h \
  C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/m0p/dl_interrupt.h \
- C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/m0p/dl_systick.h \
-<<<<<<< HEAD
- C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/dl_spi_multibyte.h \
-=======
->>>>>>> origin/HEAD
- ../bma530.h
+ C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/m0p/dl_systick.h
+../bma530.h:
 ti_msp_dl_config.h:
 C:/ti/mspm0_sdk_2_07_00_05/source/ti/devices/msp/msp.h:
 C:/ti/mspm0_sdk_2_07_00_05/source/ti/devices/DeviceFamily.h:
@@ -156,8 +152,3 @@ C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/dl_vref.h:
 C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/dl_wwdt.h:
 C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/m0p/dl_interrupt.h:
 C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/m0p/dl_systick.h:
-<<<<<<< HEAD
-C:/ti/mspm0_sdk_2_07_00_05/source/ti/driverlib/dl_spi_multibyte.h:
-=======
->>>>>>> origin/HEAD
-../bma530.h:
