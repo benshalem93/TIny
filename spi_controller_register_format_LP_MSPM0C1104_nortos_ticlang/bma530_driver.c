@@ -1,65 +1,6 @@
-/*
- * Copyright (c) 2020, Texas Instruments Incorporated
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * *  Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * *  Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * *  Neither the name of Texas Instruments Incorporated nor the names of
- *    its contributors may be used to endorse or promote products derived
- *    from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #include "ti_msp_dl_config.h"
-#include <ti/driverlib/dl_spi_multibyte.h>
-#include "bma530.h"
-/*
- * CMD_WRITE_TYPE_X are example write commands/register addresses the
- * Controller sends to the Peripheral. The Peripheral will initialize itself
- * to receive gCmdWriteTypeXBuffer example buffers.
- */
-#define CMD_WRITE_TYPE_0 (3)
-#define CMD_WRITE_TYPE_1 (4)
-#define CMD_WRITE_TYPE_2 (5)
+#include "bma530_driver.h"
 
-/*
- * CMD_READ_TYPE_X are example read commands/register addresses the Controller
- * sends to the Peripheral. The Peripheral will send example
- * gCmdReadTypeXBuffer buffers in response.
- */
-#define CMD_READ_TYPE_0 (0)
-#define CMD_READ_TYPE_1 (1)
-#define CMD_READ_TYPE_2 (2)
-
-/*
- * TYPE_x_LENGTH defines the length expected from the command, not including
- *  the command itself.
- * For READ commands, it represents the bytes received from the SPI Peripheral.
- * For WRITE commands, it represents the bytes sent to the SPI Peripheral.
- */
-#define TYPE_0_LENGTH (1)
-#define TYPE_1_LENGTH (2)
-#define TYPE_2_LENGTH (6)
 
 /* Maximum buffer size defined for this example */
 #define MAX_BUFFER_SIZE (20)
@@ -67,7 +8,7 @@
 /* Dummy data sent when receiving data from SPI Peripheral */
 #define DUMMY_DATA (0x00)
 
-/* State machine to keep track of the current SPI Controller mode */
+
 typedef enum SPI_ControllerModeEnum {
     IDLE_MODE,
     TX_REG_ADDRESS_WRITE_MODE,
@@ -77,21 +18,7 @@ typedef enum SPI_ControllerModeEnum {
     TIMEOUT_MODE
 } SPI_Controller_Mode;
 
-/*
- * gCmdWriteTypeXBuffer are example buffers initialized in the
- * Controller, they will be sent by the Controller to the Peripheral.
- */
-uint8_t gCmdWriteType0Buffer[TYPE_0_LENGTH] = {0x11};
-uint8_t gCmdWriteType1Buffer[TYPE_1_LENGTH] = {8, 9};
-uint8_t gCmdWriteType2Buffer[TYPE_2_LENGTH] = {'A', 'B', 'C', 'D', 'E', 'F'};
 
-/*
- * gCmdReadTypeXBuffer are example buffers initialized in the
- * Peripheral, they will be sent by the Peripheral to the Controller.
- */
-uint8_t gCmdReadType0Buffer[TYPE_0_LENGTH] = {0};
-uint8_t gCmdReadType1Buffer[TYPE_1_LENGTH] = {0};
-uint8_t gCmdReadType2Buffer[TYPE_2_LENGTH] = {0};
 
 /* Buffer used to receive data in the ISR */
 uint8_t gRxBuffer[MAX_BUFFER_SIZE] = {0};
@@ -110,103 +37,22 @@ volatile uint8_t gTxByteCount = 0;
 volatile uint8_t gTxIndex = 0;
 
 
-/* Local function prototypes */
-static void CopyArray(uint8_t *source, uint8_t *dest, uint8_t count);
-static void SPI_Controller_writeReg(
-    uint8_t writeCmd, uint8_t *data, uint8_t count);
-static void SPI_Controller_readReg(uint8_t readCmd, uint8_t count);
-
-static void gotHere()
+/*
+ * Copies an array from source to destination
+ *
+ *  source   Pointer to source array
+ *  dest     Pointer to destination array
+ *  count    Number of bytes to copy
+ *
+ */
+static void CopyArray(uint8_t *source, uint8_t *dest, uint8_t count)
 {
-    while (1) {
-            DL_GPIO_togglePins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
-            delay_cycles(1000000);
-        }
-}
-
-int main(void)
-{
-    SYSCFG_DL_init();
-
-    /* Enable interrupts */
-    DL_SYSCTL_disableSleepOnExit();
-    NVIC_EnableIRQ(SPI_0_INST_INT_IRQN);
-
-    /* Set LED to indicate start of transfer */
-    DL_GPIO_clearPins(
-        GPIO_LEDS_PORT, (GPIO_LEDS_USER_LED_1_PIN ));
-
-
-    /*
-     * Send Read Type 2 Command to Peripheral device.
-     * Copy received data to gCmdReadType2Buffer.
-     */
-    // SPI_Controller_readReg(CMD_READ_TYPE_2, TYPE_2_LENGTH);
-    // CopyArray(gRxBuffer, gCmdReadType2Buffer, TYPE_2_LENGTH);
-
-    
-    // uint8_t data = BMA530_CMD_SOFT_RESET;
-    // uint8_t chipId = 0;
-    // SPI_Controller_writeReg(
-    //     BMA530_REG_CMD, &data, TYPE_0_LENGTH); // soft reset
-    delay_cycles(1000000);
-
-    uint8_t data[] = {0x80, 0x00, 0x00};
-    DL_SPI_transmitDataMultiByte8(SPI0, GPIOA, DL_GPIO_PIN_2, data, 3);
-    
-    // SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_1_LENGTH);
-
-    delay_cycles(100000);
-
-    DL_SPI_transmitDataMultiByte8(SPI0, GPIOA, DL_GPIO_PIN_2, data, 3);
-
-    // SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_1_LENGTH);
-    // SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_0_LENGTH);
-    CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
-    if(gCmdReadType1Buffer[1] == 0xC2 || gCmdReadType1Buffer[1] == 0x43)
-    {
-        gotHere();
+    uint8_t copyIndex = 0;
+    for (copyIndex = 0; copyIndex < count; copyIndex++) {
+        dest[copyIndex] = source[copyIndex];
     }
- 
-
-    /*
-     * Send Read Type 1 Command to Peripheral device.
-     * Copy received data to gCmdReadType1Buffer.
-     */
-    // SPI_Controller_readReg(CMD_READ_TYPE_1, TYPE_1_LENGTH);
-    // CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
-
-
-    // /*
-    //  * Send Read Type 0 Command to Peripheral device.
-    //  * Copy received data to gCmdReadType0Buffer.
-    //  */
-    // SPI_Controller_readReg(CMD_READ_TYPE_0, TYPE_0_LENGTH);
-    // CopyArray(gRxBuffer, gCmdReadType0Buffer, TYPE_0_LENGTH);
-
-
-    // /* Send Write Type 2 Command to Peripheral device */
-    // SPI_Controller_writeReg(
-    //     CMD_WRITE_TYPE_2, gCmdWriteType2Buffer, TYPE_2_LENGTH);
-
-
-    // /* Send Write Type 1 Command to Peripheral device */
-    // SPI_Controller_writeReg(
-    //     CMD_WRITE_TYPE_1, gCmdWriteType1Buffer, TYPE_1_LENGTH);
-
-
-    // /* Send Write Type 0 Command to Peripheral device */
-    // SPI_Controller_writeReg(
-    //     CMD_WRITE_TYPE_0, gCmdWriteType0Buffer, TYPE_0_LENGTH);
-
-
-    // /* If write and read were successful, toggle LED */
-    // while (1) {
-    //     DL_GPIO_togglePins(GPIO_LEDS_PORT,
-    //         (GPIO_LEDS_USER_LED_1_PIN ));
-    //     delay_cycles(12000000);
-    // }
 }
+
 
 void SPI_0_INST_IRQHandler(void)
 {
@@ -301,6 +147,9 @@ static void SPI_Controller_writeReg(
     gRxByteCount = count;
     gRxIndex     = 0;
     gTxIndex     = 0;
+    writeCmd = writeCmd & 0x7F;
+
+    DL_GPIO_clearPins(GPIOA, DL_GPIO_PIN_2);
 
     /*
      * TX interrupts are disabled and RX interrupts are enabled by default.
@@ -319,6 +168,8 @@ static void SPI_Controller_writeReg(
     /* Disable TX interrupts after the command is complete */
     DL_SPI_disableInterrupt(SPI_0_INST, DL_SPI_INTERRUPT_TX);
     DL_SPI_clearInterruptStatus(SPI_0_INST, DL_SPI_INTERRUPT_TX);
+
+    DL_GPIO_setPins(GPIOA, DL_GPIO_PIN_2);
 }
 
 /*
@@ -343,6 +194,10 @@ static void SPI_Controller_readReg(uint8_t readCmd, uint8_t count)
     gTxByteCount    = count;
     gRxIndex        = 0;
     gTxIndex        = 0;
+    
+    readCmd = readCmd | 0x80;
+
+    DL_GPIO_clearPins(GPIOA, DL_GPIO_PIN_2);
 
     /*
      * TX interrupts are disabled and RX interrupts are enabled by default.
@@ -361,20 +216,86 @@ static void SPI_Controller_readReg(uint8_t readCmd, uint8_t count)
     /* Disable TX interrupts after the command is complete */
     DL_SPI_disableInterrupt(SPI_0_INST, DL_SPI_INTERRUPT_TX);
     DL_SPI_clearInterruptStatus(SPI_0_INST, DL_SPI_INTERRUPT_TX);
+    DL_GPIO_setPins(GPIOA, DL_GPIO_PIN_2);
 }
 
-/*
- * Copies an array from source to destination
- *
- *  source   Pointer to source array
- *  dest     Pointer to destination array
- *  count    Number of bytes to copy
- *
- */
-static void CopyArray(uint8_t *source, uint8_t *dest, uint8_t count)
+
+float convert2mpss(int16_t data, BMA530_Range range)
 {
-    uint8_t copyIndex = 0;
-    for (copyIndex = 0; copyIndex < count; copyIndex++) {
-        dest[copyIndex] = source[copyIndex];
+    float scale = 2048.0;
+    switch (range) {
+        case RANGE_2G:
+            scale = scale * 8.0;
+            break;
+        case RANGE_4G:
+            scale = scale * 4.0;
+            break;
+        case RANGE_8G:
+            scale = scale * 2.0;
+            break;
+        default:
+            break;
     }
+    return data * (9.80665 / scale);
+}
+
+
+void BMA530_ReadAccel(BMA530_AccelXYZ *acc, BMA530_Range range)
+{
+    uint8_t data[7];
+    uint8_t status[2];
+
+    while ((status[1] & 0x01) == 0x01)
+    {
+        SPI_Controller_readReg(BMA530_REG_SENSOR_STATUS, 1);
+        CopyArray(gRxBuffer, status, 1);
+    }
+
+    SPI_Controller_readReg(BMA530_REG_ACC_DATA_0, 7);
+    CopyArray(gRxBuffer, data, 7);
+
+    acc->x = convert2mpss((int16_t)((data[2] << 8) | data[1]), range);
+    acc->y = convert2mpss((int16_t)((data[4] << 8) | data[3]), range);
+    acc->z = convert2mpss((int16_t)((data[6] << 8) | data[5]), range);
+}
+
+
+void BMA530_init()
+{
+    // SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_1_LENGTH);
+
+    // delay_cycles(100000);
+
+    // SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_1_LENGTH);
+    // CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
+    // if (gCmdReadType1Buffer[1] != 0xC2)
+    // {
+    //     return;
+    // }
+
+    // delay_cycles(100000);
+
+    // SPI_Controller_readReg(BMA530_REG_ACCEL_CONF_1, TYPE_1_LENGTH);
+    // CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
+    // uint8_t add_conf_1 = (gCmdReadType1Buffer[1] | 0x80);
+    
+    // delay_cycles(100000);
+    // uint8_t data[] = {add_conf_1};
+    // SPI_Controller_writeReg(BMA530_REG_ACCEL_CONF_1, data, 1);
+
+    // delay_cycles(100000);
+    // data[0] = 0x00;
+    // SPI_Controller_writeReg(0x30, data, 1);
+
+    // delay_cycles(100000);
+    // data[0] = 0xA6;
+    // SPI_Controller_writeReg(0x31, data, 1);
+
+    // delay_cycles(100000);
+    // data[0] = 0x03;
+    // SPI_Controller_writeReg(0x32, data, 1);
+
+    // delay_cycles(100000);
+    // data[0] = 0x0F;
+    // SPI_Controller_writeReg(0x30, data, 1);
 }
