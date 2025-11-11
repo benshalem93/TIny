@@ -31,7 +31,8 @@
  */
 
 #include "ti_msp_dl_config.h"
-
+#include <ti/driverlib/dl_spi_multibyte.h>
+#include "bma530.h"
 /*
  * CMD_WRITE_TYPE_X are example write commands/register addresses the
  * Controller sends to the Peripheral. The Peripheral will initialize itself
@@ -64,7 +65,7 @@
 #define MAX_BUFFER_SIZE (20)
 
 /* Dummy data sent when receiving data from SPI Peripheral */
-#define DUMMY_DATA (0xFF)
+#define DUMMY_DATA (0x00)
 
 /* State machine to keep track of the current SPI Controller mode */
 typedef enum SPI_ControllerModeEnum {
@@ -115,9 +116,16 @@ static void SPI_Controller_writeReg(
     uint8_t writeCmd, uint8_t *data, uint8_t count);
 static void SPI_Controller_readReg(uint8_t readCmd, uint8_t count);
 
-int main(void)
+static void gotHere()
+{
+    while (1) {
+            DL_GPIO_togglePins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN);
+            delay_cycles(1000000);
+        }
+}
 
-DL_UART_setRTSOutput(UART_Regs *uart, DL_UART_RTS val){
+int main(void)
+{
     SYSCFG_DL_init();
 
     /* Enable interrupts */
@@ -126,54 +134,78 @@ DL_UART_setRTSOutput(UART_Regs *uart, DL_UART_RTS val){
 
     /* Set LED to indicate start of transfer */
     DL_GPIO_clearPins(
-        GPIO_LEDS_PORT, (GPIO_LEDS_USER_LED_1_PIN | GPIO_LEDS_USER_TEST_PIN));
+        GPIO_LEDS_PORT, (GPIO_LEDS_USER_LED_1_PIN ));
 
 
     /*
      * Send Read Type 2 Command to Peripheral device.
      * Copy received data to gCmdReadType2Buffer.
      */
-    SPI_Controller_readReg(CMD_READ_TYPE_2, TYPE_2_LENGTH);
-    CopyArray(gRxBuffer, gCmdReadType2Buffer, TYPE_2_LENGTH);
+    // SPI_Controller_readReg(CMD_READ_TYPE_2, TYPE_2_LENGTH);
+    // CopyArray(gRxBuffer, gCmdReadType2Buffer, TYPE_2_LENGTH);
 
+    
+    // uint8_t data = BMA530_CMD_SOFT_RESET;
+    // uint8_t chipId = 0;
+    // SPI_Controller_writeReg(
+    //     BMA530_REG_CMD, &data, TYPE_0_LENGTH); // soft reset
+    delay_cycles(1000000);
+
+    uint8_t data[] = {0x80, 0x00, 0x00};
+    DL_SPI_transmitDataMultiByte8(SPI0, GPIOA, DL_GPIO_PIN_2, data, 3);
+    
+    // SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_1_LENGTH);
+
+    delay_cycles(100000);
+
+    DL_SPI_transmitDataMultiByte8(SPI0, GPIOA, DL_GPIO_PIN_2, data, 3);
+
+    // SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_1_LENGTH);
+    // SPI_Controller_readReg(BMA530_REG_CHIP_ID, TYPE_0_LENGTH);
+    CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
+    if(gCmdReadType1Buffer[1] == 0xC2 || gCmdReadType1Buffer[1] == 0x43)
+    {
+        gotHere();
+    }
+ 
 
     /*
      * Send Read Type 1 Command to Peripheral device.
      * Copy received data to gCmdReadType1Buffer.
      */
-    SPI_Controller_readReg(CMD_READ_TYPE_1, TYPE_1_LENGTH);
-    CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
+    // SPI_Controller_readReg(CMD_READ_TYPE_1, TYPE_1_LENGTH);
+    // CopyArray(gRxBuffer, gCmdReadType1Buffer, TYPE_1_LENGTH);
 
 
-    /*
-     * Send Read Type 0 Command to Peripheral device.
-     * Copy received data to gCmdReadType0Buffer.
-     */
-    SPI_Controller_readReg(CMD_READ_TYPE_0, TYPE_0_LENGTH);
-    CopyArray(gRxBuffer, gCmdReadType0Buffer, TYPE_0_LENGTH);
+    // /*
+    //  * Send Read Type 0 Command to Peripheral device.
+    //  * Copy received data to gCmdReadType0Buffer.
+    //  */
+    // SPI_Controller_readReg(CMD_READ_TYPE_0, TYPE_0_LENGTH);
+    // CopyArray(gRxBuffer, gCmdReadType0Buffer, TYPE_0_LENGTH);
 
 
-    /* Send Write Type 2 Command to Peripheral device */
-    SPI_Controller_writeReg(
-        CMD_WRITE_TYPE_2, gCmdWriteType2Buffer, TYPE_2_LENGTH);
+    // /* Send Write Type 2 Command to Peripheral device */
+    // SPI_Controller_writeReg(
+    //     CMD_WRITE_TYPE_2, gCmdWriteType2Buffer, TYPE_2_LENGTH);
 
 
-    /* Send Write Type 1 Command to Peripheral device */
-    SPI_Controller_writeReg(
-        CMD_WRITE_TYPE_1, gCmdWriteType1Buffer, TYPE_1_LENGTH);
+    // /* Send Write Type 1 Command to Peripheral device */
+    // SPI_Controller_writeReg(
+    //     CMD_WRITE_TYPE_1, gCmdWriteType1Buffer, TYPE_1_LENGTH);
 
 
-    /* Send Write Type 0 Command to Peripheral device */
-    SPI_Controller_writeReg(
-        CMD_WRITE_TYPE_0, gCmdWriteType0Buffer, TYPE_0_LENGTH);
+    // /* Send Write Type 0 Command to Peripheral device */
+    // SPI_Controller_writeReg(
+    //     CMD_WRITE_TYPE_0, gCmdWriteType0Buffer, TYPE_0_LENGTH);
 
 
-    /* If write and read were successful, toggle LED */
-    while (1) {
-        DL_GPIO_togglePins(GPIO_LEDS_PORT,
-            (GPIO_LEDS_USER_LED_1_PIN | GPIO_LEDS_USER_TEST_PIN));
-        delay_cycles(12000000);
-    }
+    // /* If write and read were successful, toggle LED */
+    // while (1) {
+    //     DL_GPIO_togglePins(GPIO_LEDS_PORT,
+    //         (GPIO_LEDS_USER_LED_1_PIN ));
+    //     delay_cycles(12000000);
+    // }
 }
 
 void SPI_0_INST_IRQHandler(void)

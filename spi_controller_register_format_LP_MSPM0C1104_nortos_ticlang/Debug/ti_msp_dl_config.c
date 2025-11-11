@@ -72,17 +72,15 @@ SYSCONFIG_WEAK void SYSCFG_DL_GPIO_init(void)
         GPIO_SPI_0_IOMUX_PICO, GPIO_SPI_0_IOMUX_PICO_FUNC);
     DL_GPIO_initPeripheralInputFunction(
         GPIO_SPI_0_IOMUX_POCI, GPIO_SPI_0_IOMUX_POCI_FUNC);
-    DL_GPIO_initPeripheralOutputFunction(
-        GPIO_SPI_0_IOMUX_CS0, GPIO_SPI_0_IOMUX_CS0_FUNC);
 
     DL_GPIO_initDigitalOutput(GPIO_LEDS_USER_LED_1_IOMUX);
 
-    DL_GPIO_initDigitalOutput(GPIO_LEDS_USER_TEST_IOMUX);
+    DL_GPIO_initDigitalOutput(GPIO_LEDS_cs_IOMUX);
 
     DL_GPIO_setPins(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN |
-		GPIO_LEDS_USER_TEST_PIN);
+		GPIO_LEDS_cs_PIN);
     DL_GPIO_enableOutput(GPIO_LEDS_PORT, GPIO_LEDS_USER_LED_1_PIN |
-		GPIO_LEDS_USER_TEST_PIN);
+		GPIO_LEDS_cs_PIN);
 
 }
 
@@ -102,11 +100,10 @@ SYSCONFIG_WEAK void SYSCFG_DL_SYSCTL_init(void)
 
 static const DL_SPI_Config gSPI_0_config = {
     .mode        = DL_SPI_MODE_CONTROLLER,
-    .frameFormat = DL_SPI_FRAME_FORMAT_MOTO4_POL0_PHA0,
+    .frameFormat = DL_SPI_FRAME_FORMAT_MOTO3_POL0_PHA0,
     .parity      = DL_SPI_PARITY_NONE,
     .dataSize    = DL_SPI_DATA_SIZE_8,
     .bitOrder    = DL_SPI_BIT_ORDER_MSB_FIRST,
-    .chipSelectPin = DL_SPI_CHIP_SELECT_0,
 };
 
 static const DL_SPI_ClockConfig gSPI_0_clockConfig = {

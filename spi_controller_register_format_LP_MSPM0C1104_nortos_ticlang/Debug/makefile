@@ -10,6 +10,7 @@ GEN_OPTS__FLAG := @"./device.opt"
 GEN_CMDS__FLAG := -Wl,-l"./device_linker.cmd" 
 
 ORDERED_OBJS += \
+"./bma530.o" \
 "./spi_controller_register_format.o" \
 "./ti_msp_dl_config.o" \
 "./startup_mspm0c110x_ticlang.o" \
@@ -136,15 +137,15 @@ all: $(OBJS) $(GEN_CMDS)
 spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang.out: $(OBJS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: Arm Linker'
-	"C:/ti/ccs2031/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -gdwarf-3 -Wl,-m"spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang.map" -Wl,-i"C:/ti/mspm0_sdk_2_07_00_05/source" -Wl,-i"C:/Users/User/workspace_ccstheia/spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang" -Wl,-i"C:/Users/User/workspace_ccstheia/spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang/Debug/syscfg" -Wl,-i"C:/ti/ccs2031/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang_linkInfo.xml" -Wl,--rom_model -o "spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang.out" $(ORDERED_OBJS)
+	"C:/ti/ccs2031/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -gdwarf-3 -Wl,-m"spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang.map" -Wl,-i"C:/ti/mspm0_sdk_2_07_00_05/source" -Wl,-i"C:/Projects/temp/spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang" -Wl,-i"C:/Projects/temp/spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang/Debug/syscfg" -Wl,-i"C:/ti/ccs2031/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,-i"ti" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang_linkInfo.xml" -Wl,--rom_model -o "spi_controller_register_format_LP_MSPM0C1104_nortos_ticlang.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(GEN_MISC_FILES__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "spi_controller_register_format.o" "ti_msp_dl_config.o" "startup_mspm0c110x_ticlang.o" 
-	-$(RM) "spi_controller_register_format.d" "ti_msp_dl_config.d" "startup_mspm0c110x_ticlang.d" 
+	-$(RM) "bma530.o" "spi_controller_register_format.o" "ti_msp_dl_config.o" "startup_mspm0c110x_ticlang.o" 
+	-$(RM) "bma530.d" "spi_controller_register_format.d" "ti_msp_dl_config.d" "startup_mspm0c110x_ticlang.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

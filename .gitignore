@@ -1,0 +1,49 @@
+# Ignore the CCS workspace
+/.metadata/
+
+# Ignore Code Composer Studio (CCS) specific files
+*.ccsproject
+*.cproject
+*.launch
+*.settings/
+*.build/
+
+# Ignore Debug and Release folders
+/Debug/
+/Release/
+
+# Ignore the TI build output files
+*.out
+*.map
+*.d
+*.lst
+*.dep
+
+# Ignore the CCS IDE temp files
+*.stackdump
+
+# Ignore build artifacts and intermediary files
+*.obj
+*.o
+*.a
+*.lib
+*.s
+*.elf
+*.eabi
+*.bak
+
+# Ignore local project settings and preferences
+/ccs_settings/
+
+# Ignore the workspace and IDE log files
+*.log
+*.bak
+
+# Ignore generated files from source control tools (e.g., Eclipse, VS Code, etc.)
+.project
+.settings/
+.idea/
+
+# Ignore all generated files related to the debugger
+*.xml
+*.bin
